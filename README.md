@@ -69,11 +69,11 @@ edit:prompt = {
 
 ## Installation
 
-Using the Elvish package manager:
+Using the [Elvish package manager](https://elv.sh/ref/epm.html):
 
 ```shell
 use epm
-epm:install https://github.com/href/elvish-gitstatus/gitstatus.elv
+epm:install github.com/href/elvish-gitstatus
 ```
 
 ## Usage
@@ -81,7 +81,7 @@ epm:install https://github.com/href/elvish-gitstatus/gitstatus.elv
 To query a folder:
 
 ```shell
-use gitstatus
+use github.com/href/elvish-gitstatus/gitstatus
 gitstatus:query /foo/bar
 ```
 
@@ -122,7 +122,7 @@ fields are set to `$nil` if the given folder is not part of a git repository.
 **`result[workdir]`**
 
 The root folder of the git repository.
-        
+
 **`result[commit]`**
 
 The commit hash of the current commit.
