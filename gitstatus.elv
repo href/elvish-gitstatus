@@ -1,7 +1,7 @@
 use str
 
 # the folder where the gitstatusd related data is stored
-appdir = ~/.elvish/package-data/gitstatusd
+appdir = ~/.elvish/package-data/gitstatus
 
 # the downloaded binary
 binary = $appdir/gitstatusd
