@@ -108,6 +108,14 @@ Processes should use fairly small amounts of memory (<2MiB on my system).
 I have not yet tested this outside of my Macbook and I use the latest commit
 of Elvish. So your mileage my vary on other systems (issues and PRs welcome).
 
+Gitstatus needs to store a binary locally. This is currently done at the
+following folder:
+
+~/.elvish/package-data/gitstatus
+
+This means that you might need to update the .gitignore file of your dotfiles
+if you check them into git.
+
 ## Fields
 
 ```
