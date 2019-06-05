@@ -50,7 +50,21 @@ fn cpu-count {
     try {
         put (getconf _NPROCESSORS_ONLN)
     } except {
-        put (splits ": " (sysctl hw.ncpu)) | drop 1    
+        put (splits ": " (sysctl hw.ncpu)) | drop 1
+    }
+}
+
+# returns the number of threads gitstatusd should use
+fn thread-count {
+    cpus = (cpu-count)
+
+    # see https://github.com/romkatv/gitstatus/issues/34
+    # would be better, but there doesn't seem
+    # to be a max function in Elvish at this point
+    if (< $cpus 16) {
+        put (* $cpus 2)
+    } else {
+        put 32
     }
 }
 
@@ -93,7 +107,7 @@ fn start {
     }
 
     (external $binary) \
-        --num-threads=(cpu-count) \
+        --num-threads=(thread-count) \
         < $state[stdin] \
         > $state[stdout] \
         2> /dev/null &
