@@ -60,7 +60,7 @@ fn thread-count {
 
     # see https://github.com/romkatv/gitstatus/issues/34
     # would be better, but there doesn't seem
-    # to be a max function in Elvish at this point
+    # to be a min function in Elvish at this point
     if (< $cpus 16) {
         put (* $cpus 2)
     } else {
