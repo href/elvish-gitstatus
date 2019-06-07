@@ -13,10 +13,29 @@ state = [
     &stdin=$nil
 ]
 
+# gets the os for the download link
+fn os {
+    name = (uname -s)
+
+    if (eq $name "Linux") {
+        if (eq (uname -o) "Android") {
+            put "Android"
+            return
+        }
+    }
+
+    put $name
+}
+
+# gets the arch for the download link
+fn arch {
+    uname -m
+}
+
 # returns the download URL of the architecture specific gitstatusd build
 fn download-url {
     base = 'https://github.com/romkatv/gitstatus/raw/master/bin/gitstatusd'
-    echo (str:to-lower $base"-"(uname -s)"-"(uname -m))
+    echo (str:to-lower $base"-"(os)"-"(arch))
 }
 
 # downloads the required gitstatusd build
