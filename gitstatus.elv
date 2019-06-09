@@ -13,6 +13,19 @@ state = [
     &stdin=$nil
 ]
 
+# configurable arguments to the gitstatusd binary
+if (not (has-env GITSTATUS_MAX_NUM_STAGED)) {
+    E:GITSTATUS_MAX_NUM_STAGED = "1"
+}
+
+if (not (has-env GITSTATUS_MAX_NUM_UNSTAGED)) {
+    E:GITSTATUS_MAX_NUM_UNSTAGED = "1"
+}
+
+if (not (has-env GITSTATUS_MAX_NUM_UNTRACKED)) {
+    E:GITSTATUS_MAX_NUM_UNTRACKED = "1"
+}
+
 # gets the os for the download link
 fn os {
     name = (uname -s)
@@ -127,6 +140,9 @@ fn start {
 
     (external $binary) \
         --num-threads=(thread-count) \
+        --max-num-staged=$E:GITSTATUS_MAX_NUM_STAGED\
+        --max-num-unstaged=$E:GITSTATUS_MAX_NUM_UNSTAGED\
+        --max-num-untracked=$E:GITSTATUS_MAX_NUM_UNTRACKED\
         < $state[stdin] \
         > $state[stdout] \
         2> /dev/null &

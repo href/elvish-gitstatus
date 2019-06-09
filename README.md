@@ -162,14 +162,17 @@ The number of files in the index.
 **`result[staged]`**
 
 The number of staged files.
+Limited to 1 by default (see configuration section).
 
 **`result[unstaged]`**
 
 The number of unstaged files.
+Limited to 1 by default (see configuration section).
 
 **`result[untracked]`**
 
 The number of untracked files.
+Limited to 1 by default (see configuration section).
 
 **`result[commits-ahead]`**
 
@@ -186,3 +189,29 @@ The number of stashes.
 **`result[tag]`**
 
 The current tag.
+
+## Configuration
+
+Configuration can be done via environment variables. It should be done before
+querying gitstatus via `gitstatus:query`. If done later, the daemon has to
+be restarted using `gitstatus:stop` and `gitstatus:start`.
+
+### Max Staged, Unstaged, Untracked
+
+By default, gitstatus limits the number of staged, unstaged and untracked files
+that it enumerates. So those values are either set to 1 or to 0. This is of
+course faster than providing an accurate count.
+
+If you need to know the exact number of files (or of there are one or many),
+then you should set the configuration as follows (here with the example value
+of 10):
+
+```
+use gitstatus
+
+$E:GITSTATUS_MAX_NUM_STAGED = "10"
+$E:GITSTATUS_MAX_NUM_UNSTAGED = "10"
+$E:GITSTATUS_MAX_NUM_UNTRACKED = "10"
+```
+
+If you want an accurate count use "-1", disabling the limit.
