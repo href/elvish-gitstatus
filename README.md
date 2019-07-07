@@ -20,6 +20,7 @@ $ pprint (gitstatus:query $pwd)
  &action=   ''
  &index-size=   0
  &untracked=    1
+ &conflicted=   1
  &workdir=  /Users/denis/Documents/Code/elvish-gitstatus
  &local-branch= master
  &remote-branch=    ''
@@ -169,6 +170,11 @@ Limited to 1 by default (see configuration section).
 The number of unstaged files.
 Limited to 1 by default (see configuration section).
 
+**`result[conflicted]`**
+
+The number of conflicted files.
+Limited to 1 by default (see configuration section).
+
 **`result[untracked]`**
 
 The number of untracked files.
@@ -212,6 +218,7 @@ use gitstatus
 $E:GITSTATUS_MAX_NUM_STAGED = "10"
 $E:GITSTATUS_MAX_NUM_UNSTAGED = "10"
 $E:GITSTATUS_MAX_NUM_UNTRACKED = "10"
+$E:GITSTATUS_MAX_NUM_CONFLICTED = "10"
 ```
 
 If you want an accurate count use "-1", disabling the limit.

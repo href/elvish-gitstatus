@@ -26,6 +26,14 @@ if (not (has-env GITSTATUS_MAX_NUM_UNTRACKED)) {
     E:GITSTATUS_MAX_NUM_UNTRACKED = "1"
 }
 
+if (not (has-env GITSTATUS_MAX_NUM_UNTRACKED)) {
+    E:GITSTATUS_MAX_NUM_UNTRACKED = "1"
+}
+
+if (not (has-env GITSTATUS_MAX_NUM_CONFLICTED)) {
+    E:GITSTATUS_MAX_NUM_CONFLICTED = "1"
+}
+
 # gets the os for the download link
 fn os {
     name = (uname -s)
@@ -143,6 +151,7 @@ fn start {
         --max-num-staged=$E:GITSTATUS_MAX_NUM_STAGED\
         --max-num-unstaged=$E:GITSTATUS_MAX_NUM_UNSTAGED\
         --max-num-untracked=$E:GITSTATUS_MAX_NUM_UNTRACKED\
+        --max-num-conflicted=$E:GITSTATUS_MAX_NUM_CONFLICTED\
         < $state[stdin] \
         > $state[stdout] \
         2> /dev/null &
@@ -167,6 +176,7 @@ fn parse-response [response]{
         &staged=$nil
         &unstaged=$nil
         &untracked=$nil
+        &conflicted=$nil
         &commits-ahead=$nil
         &commits-behind=$nil
         &stashes=$nil
@@ -184,11 +194,12 @@ fn parse-response [response]{
         result[index-size] = $output[9]
         result[staged] = $output[10]
         result[unstaged] = $output[11]
-        result[untracked] = $output[12]
-        result[commits-ahead] = $output[13]
-        result[commits-behind] = $output[14]
-        result[stashes] = $output[15]
-        result[tag] = $output[16]
+        result[conflicted] = $output[12]
+        result[untracked] = $output[13]
+        result[commits-ahead] = $output[14]
+        result[commits-behind] = $output[15]
+        result[stashes] = $output[16]
+        result[tag] = $output[17]
     }
 
     put $result
