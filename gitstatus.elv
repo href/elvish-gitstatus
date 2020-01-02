@@ -6,6 +6,10 @@ appdir = ~/.elvish/package-data/gitstatus
 # the downloaded binary
 binary = $appdir/gitstatusd
 
+# separators in the gitstatusd API
+rs = (chr 30)
+us = (chr 31)
+
 # runtime related data to keep track of the daemon
 state = [
     &running=$false
@@ -161,7 +165,8 @@ fn start {
 
 # parses the raw gitstatusd response
 fn parse-response [response]{
-    @output = (splits "\x1f" $response)
+    # last character of $response is the record separator
+    @output = (splits $us $response[0:-1])
 
     result = [
         &is-repository=(eq $output[1] 1)
@@ -211,10 +216,10 @@ fn query [repository]{
         start
     }
 
-    echo "\x1f"$repository"\x1e" > $state[stdin]
+    echo $us$repository$rs > $state[stdin]
 
-    # XXX replace this with something elvish!
-    response = (sh -c 'read -rd $''\x1e'' && echo $REPLY' < $state[stdout])
+  # This depends on Elvish 0.13, which introduces read-upto
+    response = (read-upto $rs < $state[stdout])
 
     put (parse-response $response)
 }
