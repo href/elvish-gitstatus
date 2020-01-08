@@ -228,7 +228,7 @@ fn query [repository]{
 
     echo $us$repository$rs > $state[stdin]
 
-  # This depends on Elvish commit 770904b, which introduces read-upto
+    # this depends on Elvish commit 770904b, which introduces read-upto
     response = (read-upto $rs < $state[stdout])
 
     put (parse-response $response)
