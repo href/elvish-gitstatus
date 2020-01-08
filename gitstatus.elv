@@ -71,9 +71,14 @@ fn download {
 }
 
 # installs the gitstatusd binary and creates the necessary paths, if necessary
+# does nothing if gitstatusd is in PATH
 fn ensure-installed {
-    mkdir -p $appdir
+    if (has-external gitstatusd) {
+        # already in PATH, lets use that
+        return
+    }
 
+    mkdir -p $appdir
     if (not (has-external $binary)) {
         download
         chmod 0700 $binary
@@ -144,6 +149,11 @@ fn start {
 
     for k [stdin stdout] {
         state[$k] = (pipe)
+    }
+
+    if (has-external gitstatusd) {
+        # use from PATH
+        binary = gitstatusd
     }
 
     (external $binary) \
