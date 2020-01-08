@@ -230,9 +230,10 @@ fn query [repository]{
 
     # read-upto depends on Elvish commit 770904b, otherwise fall back to calling bash
     response = $nil
-    try {
+    use builtin
+    if (has-key $builtin: read-upto~) {
       response = (read-upto $rs < $state[stdout])
-    } except {
+    } else {
       response = (bash -c 'read -rd $''\x1e'' && echo $REPLY' < $state[stdout])
     }
 
