@@ -38,6 +38,15 @@ if (not (has-env GITSTATUS_MAX_NUM_CONFLICTED)) {
     E:GITSTATUS_MAX_NUM_CONFLICTED = "1"
 }
 
+# define the get-response function depending on the Elvish version
+use builtin
+# default version uses an external call to bash
+get-response = { bash -c 'read -rd $''\x1e'' && echo $REPLY' < $state[stdout] }
+# if the read-upto function is available (introduced in Elvish commit 770904b), then use it
+if (has-key $builtin: read-upto~) {
+  get-response = { read-upto $rs < $state[stdout] }
+}
+
 # gets the os for the download link
 fn os {
     name = (uname -s)
@@ -228,14 +237,7 @@ fn query [repository]{
 
     echo $us$repository$rs > $state[stdin]
 
-    # read-upto depends on Elvish commit 770904b, otherwise fall back to calling bash
-    response = $nil
-    use builtin
-    if (has-key $builtin: read-upto~) {
-      response = (read-upto $rs < $state[stdout])
-    } else {
-      response = (bash -c 'read -rd $''\x1e'' && echo $REPLY' < $state[stdout])
-    }
+    response = ($get-response)
 
     put (parse-response $response)
 }
