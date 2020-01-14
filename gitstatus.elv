@@ -40,11 +40,15 @@ if (not (has-env GITSTATUS_MAX_NUM_CONFLICTED)) {
 
 # define the get-response function depending on the Elvish version
 use builtin
+
 # default version uses an external call to bash
-get-response = { bash -c 'read -rd $''\x1e'' && echo $REPLY' < $state[stdout] }
-# if the read-upto function is available (introduced in Elvish commit 770904b), then use it
+get-response = {
+    bash -c 'read -rd $''\x1e'' && echo $REPLY' < $state[stdout] 
+}
+
+# use the read-upto builtin if available (introduced in Elvish commit 770904b)
 if (has-key $builtin: read-upto~) {
-  get-response = { read-upto $rs < $state[stdout] }
+    get-response = { read-upto $rs < $state[stdout] }
 }
 
 # gets the os for the download link
@@ -184,8 +188,7 @@ fn start {
 
 # parses the raw gitstatusd response
 fn parse-response [response]{
-    # last character of $response is the record separator
-    @output = (splits $us $response[0:-1])
+    @output = (splits "\x1f" $response)
 
     result = [
         &is-repository=(eq $output[1] 1)
@@ -236,8 +239,5 @@ fn query [repository]{
     }
 
     echo $us$repository$rs > $state[stdin]
-
-    response = ($get-response)
-
-    put (parse-response $response)
+    put (parse-response ($get-response))
 }
