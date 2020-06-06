@@ -1,10 +1,15 @@
+use builtin
 use str
 
 # the folder where the gitstatusd related data is stored
 appdir = ~/.elvish/package-data/gitstatus
 
+# use the same exact calls as gitstatus (despite having the platform module)
+arch = (str:to-lower (uname -m))
+os = (str:to-lower (uname -s))
+
 # the downloaded binary
-binary = $appdir/gitstatusd
+binary = $appdir"/gitstatusd-"$os"-"$arch
 
 # separators in the gitstatusd API
 rs = (chr 30)
@@ -38,68 +43,39 @@ if (not (has-env GITSTATUS_MAX_NUM_CONFLICTED)) {
     E:GITSTATUS_MAX_NUM_CONFLICTED = "1"
 }
 
-# define the get-response function depending on the Elvish version
-use builtin
-
 # default version uses an external call to bash
-get-response = {
-    bash -c 'read -rd $''\x1e'' && echo $REPLY' < $state[stdout] 
+fn get-response {
+    read-upto $rs < $state[stdout]
 }
 
-# use the read-upto builtin if available (introduced in Elvish commit 770904b)
-if (has-key $builtin: read-upto~) {
-    get-response = { read-upto $rs < $state[stdout] }
-}
-
-# gets the os for the download link
-fn os {
-    name = (uname -s)
-
-    if (eq $name "Linux") {
-        if (eq (uname -o) "Android") {
-            put "Android"
-            return
-        }
-    }
-
-    put $name
-}
-
-# gets the arch for the download link
-fn arch {
-    uname -m
-}
-
-# returns the download URL of the architecture specific gitstatusd build
-fn download-url {
-    base = 'https://github.com/romkatv/gitstatus/raw/master/bin/gitstatusd'
-    echo (str:to-lower $base"-"(os)"-"(arch))
-}
-
-# downloads the required gitstatusd build
-fn download {
+# pipes the GET request of the given URL to stdout, using curl or wget
+fn http-get [url]{
     if (has-external curl) {
-        curl -L -s (download-url) > $binary
-    } elif (has-external wget) {
-        wget -O $binary (download-url)
-    } else {
-        fail("found no http client to download gitstatusd with")
-    }
-}
-
-# installs the gitstatusd binary and creates the necessary paths, if necessary
-# does nothing if gitstatusd is in PATH
-fn ensure-installed {
-    if (has-external gitstatusd) {
-        # already in PATH, lets use that
+        curl -L -s -f $url
         return
     }
 
-    mkdir -p $appdir
-    if (not (has-external $binary)) {
-        download
-        chmod 0700 $binary
+    if (has-external wget) {
+        wget -q -O- $url
+        return
     }
+
+    fail("found no http client to download gitstatusd with")
+}
+
+# not all GitHub releases come with a binary release, so we need to find
+# out which releases are available for the current platform
+fn latest-version {
+    http-get https://raw.githubusercontent.com/romkatv/gitstatus/master/install.info \
+      | grep -i (uname -s) \
+      | grep -i (uname -m) \
+      | awk '{print $4}' \
+      | cut -d '"' -f 2
+}
+
+# get the download URL for the given version
+fn download-url [version]{
+    put "https://github.com/romkatv/gitstatus/releases/download/"$version"/gitstatusd-"$os"-"$arch".tar.gz"
 }
 
 # returns true if the gitstatusd daemon is running
@@ -146,12 +122,32 @@ fn stop {
     state[running] = $false
 }
 
-# updates gitstatusd to the latest release
-fn update {
+# installs the given version
+fn install [version]{
+
     if (is-running) {
         stop
     }
 
+    mkdir -p $appdir
+    http-get (download-url $version) | tar -x -z -C $appdir
+    chmod 0700 $binary
+}
+
+# installs the gitstatusd binary and creates the necessary paths, if necessary
+# does nothing if gitstatusd is in PATH
+fn ensure-installed {
+    if (has-external gitstatusd) {
+        return  # already in PATH, lets use that
+    }
+
+    if (not ?(test -e $binary)) {
+        install (latest-version)
+    }
+}
+
+# updates gitstatusd to the latest release (keep the old version)
+fn update {
     rm $binary
     ensure-installed
 }
@@ -239,5 +235,5 @@ fn query [repository]{
     }
 
     echo $us$repository$rs > $state[stdin]
-    put (parse-response ($get-response))
+    put (parse-response (get-response))
 }
