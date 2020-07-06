@@ -88,7 +88,7 @@ fn cpu-count {
     try {
         put (getconf _NPROCESSORS_ONLN)
     } except {
-        put (splits ": " (sysctl hw.ncpu)) | drop 1
+        put (str:split ": " (sysctl hw.ncpu)) | drop 1
     }
 }
 
@@ -184,7 +184,7 @@ fn start {
 
 # parses the raw gitstatusd response
 fn parse-response [response]{
-    @output = (splits "\x1f" $response)
+    @output = (str:split "\x1f" $response)
 
     result = [
         &is-repository=(eq $output[1] 1)
