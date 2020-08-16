@@ -66,10 +66,10 @@ fn http-get [url]{
 # not all GitHub releases come with a binary release, so we need to find
 # out which releases are available for the current platform
 fn latest-version {
-    http-get https://raw.githubusercontent.com/romkatv/gitstatus/master/install.info \
-      | grep -i (uname -s) \
-      | grep -i (uname -m) \
-      | awk '{print $4}' \
+    http-get https://raw.githubusercontent.com/romkatv/gitstatus/master/install.info ^
+      | grep -i (uname -s) ^
+      | grep -i (uname -m) ^
+      | awk '{print $4}' ^
       | cut -d '"' -f 2
 }
 
@@ -169,14 +169,14 @@ fn start {
         binary = gitstatusd
     }
 
-    (external $binary) \
-        --num-threads=(thread-count) \
-        --max-num-staged=$E:GITSTATUS_MAX_NUM_STAGED\
-        --max-num-unstaged=$E:GITSTATUS_MAX_NUM_UNSTAGED\
-        --max-num-untracked=$E:GITSTATUS_MAX_NUM_UNTRACKED\
-        --max-num-conflicted=$E:GITSTATUS_MAX_NUM_CONFLICTED\
-        < $state[stdin] \
-        > $state[stdout] \
+    (external $binary) ^
+        --num-threads=(thread-count) ^
+        --max-num-staged=$E:GITSTATUS_MAX_NUM_STAGED^
+        --max-num-unstaged=$E:GITSTATUS_MAX_NUM_UNSTAGED^
+        --max-num-untracked=$E:GITSTATUS_MAX_NUM_UNTRACKED^
+        --max-num-conflicted=$E:GITSTATUS_MAX_NUM_CONFLICTED^
+        < $state[stdin] ^
+        > $state[stdout] ^
         2> /dev/null &
 
     state[running] = $true
