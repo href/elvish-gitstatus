@@ -171,10 +171,10 @@ fn start {
 
     (external $binary) ^
         --num-threads=(thread-count) ^
-        --max-num-staged=$E:GITSTATUS_MAX_NUM_STAGED^
-        --max-num-unstaged=$E:GITSTATUS_MAX_NUM_UNSTAGED^
-        --max-num-untracked=$E:GITSTATUS_MAX_NUM_UNTRACKED^
-        --max-num-conflicted=$E:GITSTATUS_MAX_NUM_CONFLICTED^
+        --max-num-staged=$E:GITSTATUS_MAX_NUM_STAGED ^
+        --max-num-unstaged=$E:GITSTATUS_MAX_NUM_UNSTAGED ^
+        --max-num-untracked=$E:GITSTATUS_MAX_NUM_UNTRACKED ^
+        --max-num-conflicted=$E:GITSTATUS_MAX_NUM_CONFLICTED ^
         < $state[stdin] ^
         > $state[stdout] ^
         2> /dev/null &
