@@ -130,7 +130,7 @@ fn install [version]{
     }
 
     mkdir -p $appdir
-    http-get (download-url $version) | tar -x -z -C $appdir
+    http-get (download-url $version) | tar -x -z -C $appdir -f -
     chmod 0700 $binary
 }
 
