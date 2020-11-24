@@ -69,6 +69,7 @@ fn latest-version {
     http-get https://raw.githubusercontent.com/romkatv/gitstatus/master/install.info ^
       | grep -i (uname -s) ^
       | grep -i (uname -m) ^
+      | head -n 1 ^
       | awk '{print $4}' ^
       | cut -d '"' -f 2
 }
