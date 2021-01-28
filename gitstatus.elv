@@ -12,8 +12,8 @@ os = (str:to-lower (uname -s))
 binary = $appdir"/gitstatusd-"$os"-"$arch
 
 # separators in the gitstatusd API
-rs = (chr 30)
-us = (chr 31)
+rs = (str:from-codepoints 30)
+us = (str:from-codepoints 31)
 
 # runtime related data to keep track of the daemon
 state = [
