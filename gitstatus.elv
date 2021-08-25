@@ -1,4 +1,5 @@
 use builtin
+use file
 use str
 
 # the folder where the gitstatusd related data is stored
@@ -115,8 +116,8 @@ fn stop {
 
     # closing the pipes stops the process
     for k [stdin stdout] {
-        prclose $state[$k]
-        pwclose $state[$k]
+        file:close $state[$k][r]
+        file:close $state[$k][w]
         state[$k] = $nil
     }
 
@@ -162,7 +163,7 @@ fn start {
     }
 
     for k [stdin stdout] {
-        state[$k] = (pipe)
+        state[$k] = (file:pipe)
     }
 
     if (has-external gitstatusd) {
