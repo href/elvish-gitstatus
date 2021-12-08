@@ -3,21 +3,21 @@ use file
 use str
 
 # the folder where the gitstatusd related data is stored
-appdir = ~/.elvish/package-data/gitstatus
+var appdir = ~/.elvish/package-data/gitstatus
 
 # use the same exact calls as gitstatus (despite having the platform module)
-arch = (str:to-lower (uname -m))
-os = (str:to-lower (uname -s))
+var arch = (str:to-lower (uname -m))
+var os = (str:to-lower (uname -s))
 
 # the downloaded binary
-binary = $appdir"/gitstatusd-"$os"-"$arch
+var binary = $appdir"/gitstatusd-"$os"-"$arch
 
 # separators in the gitstatusd API
-rs = (str:from-codepoints 30)
-us = (str:from-codepoints 31)
+var rs = (str:from-codepoints 30)
+var us = (str:from-codepoints 31)
 
 # runtime related data to keep track of the daemon
-state = [
+var state = [
     &running=$false
     &stdout=$nil
     &stdin=$nil
@@ -25,23 +25,23 @@ state = [
 
 # configurable arguments to the gitstatusd binary
 if (not (has-env GITSTATUS_MAX_NUM_STAGED)) {
-    E:GITSTATUS_MAX_NUM_STAGED = "1"
+    set-env GITSTATUS_MAX_NUM_STAGED "1"
 }
 
 if (not (has-env GITSTATUS_MAX_NUM_UNSTAGED)) {
-    E:GITSTATUS_MAX_NUM_UNSTAGED = "1"
+    set-env GITSTATUS_MAX_NUM_UNSTAGED "1"
 }
 
 if (not (has-env GITSTATUS_MAX_NUM_UNTRACKED)) {
-    E:GITSTATUS_MAX_NUM_UNTRACKED = "1"
+    set-env GITSTATUS_MAX_NUM_UNTRACKED "1"
 }
 
 if (not (has-env GITSTATUS_MAX_NUM_UNTRACKED)) {
-    E:GITSTATUS_MAX_NUM_UNTRACKED = "1"
+    set-env GITSTATUS_MAX_NUM_UNTRACKED "1"
 }
 
 if (not (has-env GITSTATUS_MAX_NUM_CONFLICTED)) {
-    E:GITSTATUS_MAX_NUM_CONFLICTED = "1"
+    set-env GITSTATUS_MAX_NUM_CONFLICTED "1"
 }
 
 # default version uses an external call to bash
@@ -50,7 +50,7 @@ fn get-response {
 }
 
 # pipes the GET request of the given URL to stdout, using curl or wget
-fn http-get [url]{
+fn http-get {|url|
     if (has-external curl) {
         curl -L -s -f $url
         return
@@ -76,7 +76,7 @@ fn latest-version {
 }
 
 # get the download URL for the given version
-fn download-url [version]{
+fn download-url {|version|
     put "https://github.com/romkatv/gitstatus/releases/download/"$version"/gitstatusd-"$os"-"$arch".tar.gz"
 }
 
@@ -96,7 +96,7 @@ fn cpu-count {
 
 # returns the number of threads gitstatusd should use
 fn thread-count {
-    cpus = (cpu-count)
+    var cpus = (cpu-count)
 
     # see https://github.com/romkatv/gitstatus/issues/34
     # would be better, but there doesn't seem
@@ -118,14 +118,14 @@ fn stop {
     for k [stdin stdout] {
         file:close $state[$k][r]
         file:close $state[$k][w]
-        state[$k] = $nil
+        set state[$k] = $nil
     }
 
-    state[running] = $false
+    set state[running] = $false
 }
 
 # installs the given version
-fn install [version]{
+fn install {|version|
 
     if (is-running) {
         stop
@@ -163,12 +163,12 @@ fn start {
     }
 
     for k [stdin stdout] {
-        state[$k] = (file:pipe)
+        set state[$k] = (file:pipe)
     }
 
     if (has-external gitstatusd) {
         # use from PATH
-        binary = gitstatusd
+        var binary = gitstatusd
     }
 
     (external $binary) ^
@@ -181,14 +181,14 @@ fn start {
         > $state[stdout] ^
         2> /dev/null &
 
-    state[running] = $true
+    set state[running] = $true
 }
 
 # parses the raw gitstatusd response
-fn parse-response [response]{
-    @output = (str:split "\x1f" $response)
+fn parse-response {|response|
+    var @output = (str:split "\x1f" $response)
 
-    result = [
+    var result = [
         &is-repository=(eq $output[1] 1)
         &workdir=$nil
         &commit=$nil
@@ -209,29 +209,29 @@ fn parse-response [response]{
     ]
 
     if (bool $result[is-repository]) {
-        result[workdir] = $output[2]
-        result[commit] = $output[3]
-        result[local-branch] = $output[4]
-        result[remote-branch] = $output[5]
-        result[remote-name] = $output[6]
-        result[remote-url] = $output[7]
-        result[action] = $output[8]
-        result[index-size] = $output[9]
-        result[staged] = $output[10]
-        result[unstaged] = $output[11]
-        result[conflicted] = $output[12]
-        result[untracked] = $output[13]
-        result[commits-ahead] = $output[14]
-        result[commits-behind] = $output[15]
-        result[stashes] = $output[16]
-        result[tag] = $output[17]
+        set result[workdir] = $output[2]
+        set result[commit] = $output[3]
+        set result[local-branch] = $output[4]
+        set result[remote-branch] = $output[5]
+        set result[remote-name] = $output[6]
+        set result[remote-url] = $output[7]
+        set result[action] = $output[8]
+        set result[index-size] = $output[9]
+        set result[staged] = $output[10]
+        set result[unstaged] = $output[11]
+        set result[conflicted] = $output[12]
+        set result[untracked] = $output[13]
+        set result[commits-ahead] = $output[14]
+        set result[commits-behind] = $output[15]
+        set result[stashes] = $output[16]
+        set result[tag] = $output[17]
     }
 
     put $result
 }
 
 # runs the query against the given path and returns the result in a map
-fn query [repository]{
+fn query {|repository|
     if (not (is-running)) {
         start
     }
