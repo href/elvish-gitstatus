@@ -89,7 +89,7 @@ fn is-running {
 fn cpu-count {
     try {
         put (getconf _NPROCESSORS_ONLN)
-    } except {
+    } catch {
         put (str:split ": " (sysctl hw.ncpu)) | drop 1
     }
 }
